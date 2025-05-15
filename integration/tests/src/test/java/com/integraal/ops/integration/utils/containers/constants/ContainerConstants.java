@@ -1,6 +1,6 @@
-package com.integraal.ops.integration.utils.containers;
+package com.integraal.ops.integration.utils.containers.constants;
 
-public class ContainerConstants {
+public final class ContainerConstants {
 
     public static final String POSTGRES_DOCKER_IMAGE_TAG = "postgres:16.4";
 

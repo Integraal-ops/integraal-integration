@@ -4,7 +4,7 @@ import com.integraal.ops.integration.IntegraalIntegrationTestApplication;
 import com.integraal.ops.integration.flow.beans.EntrypointFlowInbean;
 import com.integraal.ops.integration.utils.ApplicationComponents;
 import com.integraal.ops.integration.utils.ContextUtils;
-import com.integraal.ops.integration.utils.containers.ContainerConstants;
+import com.integraal.ops.integration.utils.containers.constants.ContainerConstants;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
