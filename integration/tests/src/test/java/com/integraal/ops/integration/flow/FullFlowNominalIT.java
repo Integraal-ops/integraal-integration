@@ -1,8 +1,8 @@
 package com.integraal.ops.integration.flow;
 
-import com.integraal.ops.integration.IntegraalIntegrationTestApplication;
+import com.integraal.ops.integration.utils.applications.IntegraalIntegrationTestApplication;
 import com.integraal.ops.integration.flow.beans.EntrypointFlowInbean;
-import com.integraal.ops.integration.utils.ApplicationComponents;
+import com.integraal.ops.integration.utils.applications.components.ApplicationComponents;
 import com.integraal.ops.integration.utils.ContextUtils;
 import com.integraal.ops.integration.utils.containers.constants.ContainerConstants;
 import org.junit.jupiter.api.AfterAll;

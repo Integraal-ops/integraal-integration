@@ -1,5 +1,6 @@
 package com.integraal.ops.integration.utils;
 
+import com.integraal.ops.integration.utils.applications.components.ApplicationComponents;
 import org.springframework.context.ApplicationContext;
 
 import java.lang.reflect.Field;

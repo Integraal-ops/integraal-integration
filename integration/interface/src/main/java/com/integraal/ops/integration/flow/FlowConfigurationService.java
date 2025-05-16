@@ -1,6 +1,5 @@
-package com.integraal.ops.integration;
+package com.integraal.ops.integration.flow;
 
-import com.integraal.ops.integration.flow.EntrypointService;
 import com.integraal.ops.integration.transversal.exceptions.ServiceFatalException;
 
 import java.util.UUID;

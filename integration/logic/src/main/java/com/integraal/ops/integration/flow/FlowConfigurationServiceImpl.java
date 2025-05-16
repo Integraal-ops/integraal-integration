@@ -1,6 +1,5 @@
 package com.integraal.ops.integration.flow;
 
-import com.integraal.ops.integration.FlowConfigurationService;
 import com.integraal.ops.integration.flow.beans.FlowDefinition;
 import com.integraal.ops.integration.flow.beans.StepDefinition;
 import com.integraal.ops.integration.transversal.exceptions.ServiceFatalException;
