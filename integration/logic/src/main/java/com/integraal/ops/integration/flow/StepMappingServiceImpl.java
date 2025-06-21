@@ -1,6 +1,8 @@
 package com.integraal.ops.integration.flow;
 
 import com.integraal.ops.integration.transversal.exceptions.ServiceFatalException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 
@@ -9,12 +11,19 @@ import java.util.UUID;
 
 @Service
 public class StepMappingServiceImpl implements StepMappingService {
+    private final GenericApplicationContext applicationContext;
 
-
+    @Autowired
+    public StepMappingServiceImpl(
+        GenericApplicationContext applicationContext
+    ) {
+        this.applicationContext = applicationContext;
+    }
 
     @Override
     public MessageChannel getChannelForStepId(UUID flowId, UUID stepId) throws ServiceFatalException {
-        return null;
+        FlowConfigurationService flowConfigurationService = applicationContext.getBean(FlowConfigurationService.class);
+        return flowConfigurationService.getMessageChannel(flowId, stepId).orElseThrow();
     }
 
     @Override
@@ -24,12 +33,13 @@ public class StepMappingServiceImpl implements StepMappingService {
 
     @Override
     public MessageChannel getMessageChannelForStepId(UUID flowId, UUID stepId) throws ServiceFatalException {
-        return null;
+        FlowConfigurationService flowConfigurationService = applicationContext.getBean(FlowConfigurationService.class);
+        return flowConfigurationService.getMessageChannel(flowId, stepId).orElseThrow();
     }
 
     @Override
     public MessageChannel getIssueChannel() {
-        return null;
+        return this.applicationContext.getBean("issueChannel", MessageChannel.class);
     }
 
     @Override

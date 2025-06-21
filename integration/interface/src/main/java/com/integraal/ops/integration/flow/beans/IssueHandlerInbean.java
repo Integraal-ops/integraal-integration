@@ -31,6 +31,6 @@ public class IssueHandlerInbean extends GenericInbean {
 
     private UUID originStepKeyId;
 
-    // By default all errors are fatal
+    // ! If the exception should stop the FLow on error : Ex errors are fatal
     private Boolean flowEndingException = Boolean.TRUE;
 }

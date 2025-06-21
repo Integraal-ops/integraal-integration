@@ -10,6 +10,7 @@ import lombok.With;
 
 import java.time.OffsetDateTime;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 @Getter
@@ -20,10 +21,9 @@ import java.util.UUID;
 @ToString
 @With
 public class EntrypointFlowInbean {
-
+    // * The flow ID is optional as there could be a discovery process
+    private Optional<UUID> flowKeyId;
     private Map<String, String> inputMetaData;
-    // Each implementation of entry point should initialize with the FlowID
     private Object inputData;
-
     private OffsetDateTime receivedDate;
 }

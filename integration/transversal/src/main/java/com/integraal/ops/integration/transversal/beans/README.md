@@ -25,3 +25,15 @@ is to manage AOP Globally easily such as :
 * **ControllerInBean/ControllerOutBean** : Beans used as input/output API exposed via Controllers
 * **CronInBean/CronOutBean** : Beans used as Input/Output of CRON methods (Output is used mainly as logging information source)
 * **ApiInBean/ApiOutBean** : Beans used as body for Requests/Responses of API calls made by the application to external services
+
+# Configuration process
+The configuration of different aspect of the project will be defined in special beans that will be
+built at startup of the application.
+For now as the Documentation is manually handled, here some set of rules
+## Rules :  
+* is for all `ConfigurationBean` to have Builders or explicitly manage default values.
+* All fields of the `ConfigurationBeans` needs to be well documented with examples.
+* If a Filed is an enumeration of some type, in the documentation all values has to be explicitly written.
+
+## Improvements
+* Find a tool / way to automatically document a `ConfigurationBean` from the code

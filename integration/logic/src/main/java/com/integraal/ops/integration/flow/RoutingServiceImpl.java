@@ -43,6 +43,7 @@ public class RoutingServiceImpl implements RoutingService {
     @Override
     public void handleMessage(RoutingInBean routingInBean) {
         try {
+            log.info("Handling flow steps in bean: '{}'", routingInBean);
             UUID flowId = routingInBean.getFlowId()
                 .orElseThrow(() -> new ServiceFatalException("RoutingServiceImpl - handleMessage - No flowId for message. routingInBean '" + routingInBean + "'"));
             UUID flowKeyId = routingInBean.getFlowKeyId();
@@ -51,7 +52,7 @@ public class RoutingServiceImpl implements RoutingService {
             String flowDataId = routingInBean.getFlowDataId();
             MessageChannel issueChannel = this.stepMappingService.getIssueChannel();
             ProcessStep previousProcessStep = this.processStepRepository.findById(originStepKeyId)
-                .orElseThrow(null);
+                .orElseThrow();
             if (routingInBean.getExceptionOnOriginStep().isPresent()) {
                 // TODO :: 17/08/2024 :: Implement Errors case : (Fatal Error + Warning Error)
                 UUID exceptionId = routingInBean.getExceptionOnOriginStep().get();
@@ -138,6 +139,7 @@ public class RoutingServiceImpl implements RoutingService {
             .build();
         Message<IssueHandlerInbean> issueMessage = MessageBuilder.withPayload(issueHandlerInbean).build();
         // TODO :: no Check on the sending for issue queue, otherwise The service is on fatal state
+        log.info("Sending Message to issue channel '{}'", issueHandlerInbean);
         issueChannel.send(issueMessage);
     }
 

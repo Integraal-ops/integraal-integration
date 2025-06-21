@@ -27,6 +27,8 @@ public class FlowStepInbean extends GenericInbean {
 
     private  UUID stepKeyId;
 
+    private UUID stepId;
+
     private String flowDataId;
 
 }

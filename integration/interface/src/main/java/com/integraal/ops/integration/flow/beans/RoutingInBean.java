@@ -22,17 +22,19 @@ import java.util.UUID;
 @With
 public class RoutingInBean extends GenericInbean {
 
+    private RoutingType routingType;
+
     private Optional<UUID> flowId;
 
-    private UUID flowKeyId;
+    private Optional<UUID> flowKeyId;
 
-    private UUID originStep;
+    private Optional<UUID> originStep;
 
-    private UUID originStepKeyId;
+    private Optional<UUID> originStepKeyId;
 
     private Optional<UUID> exceptionOnOriginStep;
 
-    private String flowDataId;
+    private Optional<String> flowDataId;
 
     private OffsetDateTime receivedDate;
 }
