@@ -1,4 +1,4 @@
-package com.integraal.ops.integration.flow.beans;
+package com.integraal.ops.integration.storage.beans;
 
 import com.integraal.ops.integration.transversal.beans.GenericInbean;
 import lombok.AllArgsConstructor;
@@ -9,9 +9,6 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.With;
 
-import java.util.Optional;
-import java.util.UUID;
-
 @Getter
 @Setter
 @Builder
@@ -19,16 +16,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @ToString
 @With
-public class FlowStepInbean extends GenericInbean {
-
-    private UUID flowId;
-
-    private UUID flowKeyId;
-
-    private UUID stepKeyId;
-
-    private UUID stepId;
-
-    private Optional<UUID> flowDataId;
-
+public class ExceptionStoreInBean extends GenericInbean {
+    private Throwable exceptionToStore;
 }

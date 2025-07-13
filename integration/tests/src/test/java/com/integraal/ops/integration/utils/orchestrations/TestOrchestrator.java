@@ -1,17 +1,15 @@
 package com.integraal.ops.integration.utils.orchestrations;
 
 import com.integraal.ops.integration.flow.FlowConfigurationService;
-import com.integraal.ops.integration.flow.FlowConfigurationServiceImpl;
-import com.integraal.ops.integration.flow.beans.FlowStepInbean;
+import com.integraal.ops.integration.flow.beans.EntrypointFlowInbean;
 import com.integraal.ops.integration.utils.orchestrations.beans.TestRunConfiguration;
 import com.integraal.ops.integration.utils.orchestrations.runners.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.data.util.Pair;
 import org.springframework.integration.dsl.context.IntegrationFlowContext;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.support.MessageBuilder;
 
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -39,28 +37,34 @@ public class TestOrchestrator {
             RunnerActions runnerActions = new RunnerActions();
             runnerActions.run(testConfiguration);
             // Run actions
-            // Sending Message to test behaviour
-            FlowStepInbean flowStepInbean = FlowStepInbean.builder()
-                    .flowId(Optional.of(UUID.fromString("ce785cd9-fc26-4b99-9134-6275266d08ac")))
-                    .stepId(UUID.fromString("f057a8dd-d4e2-4231-8a64-526c75103d99"))
-                    .flowKeyId(UUID.randomUUID())
-                    .stepKeyId(UUID.randomUUID())
-                    .flowDataId("dataId Flow")
+            // TODO :: 13/07/2025 :: Implement a proper runner for theses actions
+            // ! ==========================< RUNNER TO EXTRACT  >=======================================
+            UUID flowKeyId = UUID.fromString("ce785cd9-fc26-4b99-9134-6275266d08ac");
+            Map<String, Object> dataInputEntryPoint = Map.of(
+                    "Name", "franceTravailScenarioNominalFullTest",
+                    "StartDate", OffsetDateTime.now(),
+                    "Purpose", "Test"
+            );
+            Map<String, String> dataMetadata = Map.of();
+            ZonedDateTime receiveTime = ZonedDateTime.now();
+            EntrypointFlowInbean entrypointFlowInbean = EntrypointFlowInbean.builder()
+                    .flowKeyId(Optional.of(flowKeyId))
+                    .inputData(dataInputEntryPoint)
+                    .receivedDate(receiveTime)
+                    .inputMetaData(dataMetadata)
                     .build();
-            ((FlowConfigurationServiceImpl)
-                    applicationsLaunched
-                            .get("SimpleApplication-1")
-                            .getBean(FlowConfigurationService.class)
-            )
-            .flowsToMessageChannels.get(Pair.of(UUID.fromString("ce785cd9-fc26-4b99-9134-6275266d08ac"), UUID.fromString("f057a8dd-d4e2-4231-8a64-526c75103d99")))
-            .send(MessageBuilder.withPayload(flowStepInbean).build());
 
+            applicationsLaunched
+                .get("SimpleApplication-1")
+                .getBean(FlowConfigurationService.class)
+                .getEntrypointServiceForFlow(flowKeyId).handleMessage(entrypointFlowInbean);
             // List flows
             System.out.println("==================== Print all flows ======================");
             IntegrationFlowContext integrationFlowContext = applicationsLaunched.get("SimpleApplication-1").getBean(IntegrationFlowContext.class);
             integrationFlowContext.getRegistry().keySet().forEach(System.out::println);
 
             Thread.sleep(1_500_000);
+            // ! ==========================< RUNNER TO EXTRACT  >=======================================
             // Run assertions
             RunnerAssertions assertionsRunner = new RunnerAssertions();
             assertionsRunner.run(testConfiguration);

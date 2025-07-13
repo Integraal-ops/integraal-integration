@@ -4,7 +4,5 @@ import com.integraal.ops.integration.flow.beans.EntrypointFlowInbean;
 import com.integraal.ops.integration.transversal.services.LogicService;
 
 public interface EntrypointService extends LogicService {
-
-    public void handleMessage(EntrypointFlowInbean entrypointFlowInbean);
-
+    void handleMessage(EntrypointFlowInbean entrypointFlowInbean);
 }

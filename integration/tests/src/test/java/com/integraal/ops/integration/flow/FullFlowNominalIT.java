@@ -84,22 +84,22 @@ public class FullFlowNominalIT {
 
     @Test
     void franceTravailScenarioNominalFullTest() throws InterruptedException {
-        EntrypointService franceTravailEntrypoint = components.getFlowConfigurationService().getEntrypointServiceForFlow(UUID.fromString("ce785cd9-fc26-4b99-9134-6275266d08ac"));
-        Map<String, Object> dataInputEntryPoint = Map.of(
-            "Name", "franceTravailScenarioNominalFullTest",
-            "StartDate", OffsetDateTime.now(),
-            "Purpose", "Test"
-        );
-        Map<String, String> dataMetadata = Map.of();
-        OffsetDateTime receiveTime = OffsetDateTime.now();
-        EntrypointFlowInbean entrypointFlowInbean = EntrypointFlowInbean.builder()
-                .inputData(dataInputEntryPoint)
-                .receivedDate(receiveTime)
-                .inputMetaData(dataMetadata)
-                .build();
-        franceTravailEntrypoint.handleMessage(entrypointFlowInbean);
-
-        Thread.sleep(5000);
+//        EntrypointService franceTravailEntrypoint = components.getFlowConfigurationService().getEntrypointServiceForFlow(UUID.fromString("ce785cd9-fc26-4b99-9134-6275266d08ac"));
+//        Map<String, Object> dataInputEntryPoint = Map.of(
+//            "Name", "franceTravailScenarioNominalFullTest",
+//            "StartDate", OffsetDateTime.now(),
+//            "Purpose", "Test"
+//        );
+//        Map<String, String> dataMetadata = Map.of();
+//        OffsetDateTime receiveTime = OffsetDateTime.now();
+//        EntrypointFlowInbean entrypointFlowInbean = EntrypointFlowInbean.builder()
+//                .inputData(dataInputEntryPoint)
+//                .receivedDate(receiveTime)
+//                .inputMetaData(dataMetadata)
+//                .build();
+//        franceTravailEntrypoint.handleMessage(entrypointFlowInbean);
+//
+//        Thread.sleep(5000);
     }
 
 }
