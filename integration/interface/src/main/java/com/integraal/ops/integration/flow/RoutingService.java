@@ -5,6 +5,6 @@ import com.integraal.ops.integration.transversal.services.LogicService;
 
 public interface RoutingService  extends LogicService {
 
-    public void handleMessage(RoutingInBean routingInBean);
+    void handleMessage(RoutingInBean routingInBean);
 
 }

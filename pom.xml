@@ -27,6 +27,7 @@
         <spring.integration.aws.version>3.0.9</spring.integration.aws.version>
         <awscloud.spring.version>3.3.0</awscloud.spring.version>
 
+        <vavr.version>0.10.6</vavr.version>
         <querydsl.version>5.1.0</querydsl.version>
         <bouncycastle.bcpkix.jdk18on.version>1.80</bouncycastle.bcpkix.jdk18on.version>
         <bouncycastle.bcpg.jdk18on.version>1.80</bouncycastle.bcpg.jdk18on.version>
@@ -152,6 +153,11 @@
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
+            <version>${vavr.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

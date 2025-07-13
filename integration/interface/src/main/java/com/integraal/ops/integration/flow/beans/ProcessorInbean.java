@@ -1,6 +1,7 @@
 package com.integraal.ops.integration.flow.beans;
 
 import com.integraal.ops.integration.transversal.beans.GenericInbean;
+import com.integraal.ops.integration.transversal.contexts.FlowMethodContext;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,8 +10,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.With;
 
-import java.util.Optional;
-import java.util.UUID;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -19,16 +19,8 @@ import java.util.UUID;
 @AllArgsConstructor
 @ToString
 @With
-public class FlowStepInbean extends GenericInbean {
-
-    private UUID flowId;
-
-    private UUID flowKeyId;
-
-    private UUID stepKeyId;
-
-    private UUID stepId;
-
-    private Optional<UUID> flowDataId;
-
+public class ProcessorInbean extends GenericInbean {
+    private Map<String, String> inputMetaData;
+    private Object inputData;
+    private FlowMethodContext flowMethodContext;
 }
