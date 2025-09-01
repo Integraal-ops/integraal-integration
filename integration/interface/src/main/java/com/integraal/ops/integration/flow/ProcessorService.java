@@ -6,9 +6,9 @@ import com.integraal.ops.integration.flow.beans.ProcessorOutbean;
 import com.integraal.ops.integration.flow.beans.RoutingInBean;
 import com.integraal.ops.integration.flow.beans.RoutingType;
 import com.integraal.ops.integration.flow.errors.ProcessingError;
-import com.integraal.ops.integration.storage.ExceptionStorageService;
+import com.integraal.ops.integration.data.FlowExceptionService;
 import com.integraal.ops.integration.storage.UserDataStorageService;
-import com.integraal.ops.integration.storage.beans.ExceptionStoreInBean;
+import com.integraal.ops.integration.data.beans.FlowExceptionStoreInBean;
 import com.integraal.ops.integration.storage.beans.UserDataRetrieveInBean;
 import com.integraal.ops.integration.storage.beans.UserDataRetrieveOutBean;
 import com.integraal.ops.integration.storage.beans.UserDataStorageType;
@@ -20,6 +20,7 @@ import com.integraal.ops.integration.storage.errors.StorageWriteError;
 import com.integraal.ops.integration.transversal.contexts.FlowMethodContext;
 import com.integraal.ops.integration.transversal.services.LogicService;
 import io.vavr.Tuple;
+import io.vavr.Tuple2;
 import io.vavr.control.Either;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
@@ -27,29 +28,29 @@ import org.springframework.util.function.ThrowingFunction;
 
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Function;
 
 public interface ProcessorService extends LogicService {
 
     MessageChannel getRoutingChannel();
     UserDataStorageService getUserDataStorageService();
-    ExceptionStorageService getExceptionStorageService();
+    FlowExceptionService getExceptionStorageService();
     Either<ProcessingError, ProcessorOutbean> processMessage(ProcessorInbean inbean) throws Exception;
 
     default void handleMessageWithRoutingAndIssue(FlowStepInbean flowStepInbean) {
         MessageChannel routingChannel = getRoutingChannel();
         UserDataStorageService userDataStorageService = getUserDataStorageService();
-        ExceptionStorageService exceptionStorageService = getExceptionStorageService();
+        FlowExceptionService flowExceptionService = getExceptionStorageService();
         UUID flowId = flowStepInbean.getFlowId();
         UUID flowKeyId = flowStepInbean.getFlowKeyId();
         UUID stepId = flowStepInbean.getStepId();
         UUID stepKeyId = flowStepInbean.getStepKeyId();
-        Optional<UUID> dataId = flowStepInbean.getFlowDataId();
+        Optional<Tuple2<UserDataType, UUID>> dataId = flowStepInbean.getFlowDataId();
         // ! This field is stateful for now, in the future It should be immutable and considered as such
         FlowMethodContext initialFlowMethodContext = FlowMethodContext.initializeFlowMethodContext();
         UserDataRetrieveInBean userDataRetrieveInBean = UserDataRetrieveInBean.builder()
             // ! Insecure use of Optional::get
-            .storedDataId(dataId.get())
+            // ! Should use a pattern matching for the First value of the UserDataType
+            .storedDataId(dataId.get()._2())
             // ! TODO :: 22/06/2025 :: Handle different Storage type at Flow/StepLevel
             .storageType(UserDataStorageType.IN_MEMORY_STORAGE)
             .build();
@@ -67,7 +68,7 @@ public interface ProcessorService extends LogicService {
             ))
             .fold(
                 processingError -> ProcessorService.handleProcessingError(
-                    routingChannel, exceptionStorageService,
+                    routingChannel, flowExceptionService,
                     flowId, flowKeyId, stepId, stepKeyId,
                     dataId, processingError
                 ),
@@ -79,19 +80,18 @@ public interface ProcessorService extends LogicService {
 
     private static FlowMethodContext handleProcessingError(
             MessageChannel routingChannel,
-            ExceptionStorageService exceptionStorageService,
+            FlowExceptionService flowExceptionService,
             UUID flowId, UUID flowKeyId, UUID stepId, UUID stepKeyId,
-            Optional<UUID> storedDataId,
+            Optional<Tuple2<UserDataType, UUID>> storedDataId,
             ProcessingError processingError
     ) {
-        var flowDataId = storedDataId.map(id -> Tuple.of(UserDataType.UNSANITIZED, id));
-        ExceptionStoreInBean exceptionStoreInBean = ExceptionStoreInBean.builder()
+        FlowExceptionStoreInBean flowExceptionStoreInBean = FlowExceptionStoreInBean.builder()
             .exceptionToStore(processingError.toException())
             .build();
-        var errorStored = exceptionStorageService.storeExceptionData(exceptionStoreInBean)
+        Optional<UUID> errorStored = flowExceptionService.storeExceptionData(flowExceptionStoreInBean)
             .fold(
                 // ! TODO :: 22/06/2025 :: Do not ignore this error in the future
-                _ignored -> Optional.<UUID>empty(),
+                _ignored -> Optional.empty(),
                 exceptionStoreOutBean -> Optional.of(exceptionStoreOutBean.getExceptionId())
             );
         RoutingInBean routingInbean = RoutingInBean.builder()
@@ -100,7 +100,7 @@ public interface ProcessorService extends LogicService {
             .flowId(Optional.of(flowId))
             .originStep(Optional.of(stepId))
             .originStepKeyId(Optional.of(stepKeyId))
-            .flowDataId(flowDataId)
+            .flowDataId(storedDataId)
             .exceptionOnOriginStep(errorStored)
             .build();
         routingChannel.send(MessageBuilder.withPayload(routingInbean).build());

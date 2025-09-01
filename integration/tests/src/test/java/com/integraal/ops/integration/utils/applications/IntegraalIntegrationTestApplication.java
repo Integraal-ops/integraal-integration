@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
         "com.integraal.ops.integration.model",
         "com.integraal.ops.integration.flow",
         "com.integraal.ops.integration.storage",
+        "com.integraal.ops.integration.data",
     }
 )
 @EntityScan("com.integraal.ops.integration.model")

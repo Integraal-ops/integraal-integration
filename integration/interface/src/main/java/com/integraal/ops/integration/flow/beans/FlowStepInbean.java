@@ -1,6 +1,8 @@
 package com.integraal.ops.integration.flow.beans;
 
+import com.integraal.ops.integration.storage.beans.UserDataType;
 import com.integraal.ops.integration.transversal.beans.GenericInbean;
+import io.vavr.Tuple2;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,6 +31,6 @@ public class FlowStepInbean extends GenericInbean {
 
     private UUID stepId;
 
-    private Optional<UUID> flowDataId;
+    private Optional<Tuple2<UserDataType, UUID>> flowDataId;
 
 }

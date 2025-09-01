@@ -1,75 +1,56 @@
 package com.integraal.ops.integration.flow;
 
+import com.integraal.ops.integration.data.ProcessStepService;
 import com.integraal.ops.integration.flow.beans.FlowStepInbean;
-import com.integraal.ops.integration.flow.beans.IssueHandlerInbean;
 import com.integraal.ops.integration.flow.beans.RoutingInBean;
+import com.integraal.ops.integration.flow.errors.FlowRoutingError;
 import com.integraal.ops.integration.flow.statemachine.RoutingState;
-import com.integraal.ops.integration.flow.utils.ExceptionUtils;
-import com.integraal.ops.integration.model.persistence.ProcessStep;
-import com.integraal.ops.integration.model.persistence.StepStatus;
-import com.integraal.ops.integration.model.repositories.FlowExceptionsRepository;
 import com.integraal.ops.integration.model.repositories.ProcessStepRepository;
-import com.integraal.ops.integration.storage.ExceptionStorageService;
-import com.integraal.ops.integration.storage.ProcessStepStorageService;
+import com.integraal.ops.integration.data.FlowExceptionService;
+import com.integraal.ops.integration.transversal.contexts.FlowMethodContext;
 import com.integraal.ops.integration.transversal.exceptions.ServiceFatalException;
+import io.vavr.control.Either;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @Slf4j
 public class RoutingServiceImpl implements RoutingService {
 
-    private final StepMappingService stepMappingService;
-//    private final ProcessStepStorageService processStepStorageService;
-    private final ExceptionStorageService exceptionStorageService;
+    private final FlowExceptionService flowExceptionService;
+    private final ProcessStepService processStepService;
 
     @Autowired
     public RoutingServiceImpl(
-        StepMappingService stepMappingService,
-//        ProcessStepStorageService processStepStorageService,
-        ExceptionStorageService exceptionStorageService
+        FlowExceptionService flowExceptionService,
+        ProcessStepService processStepService
     ) {
-        this.stepMappingService = stepMappingService;
-//        this.processStepStorageService = processStepStorageService;
-        this.exceptionStorageService = exceptionStorageService;
+        this.flowExceptionService = flowExceptionService;
+        this.processStepService = processStepService;
     }
 
     @Override
     public void handleMessage(RoutingInBean routingInBean) {
 //        try {
         log.info("Handling flow steps in bean: '{}'", routingInBean);
-
-        RoutingState routingState = RoutingState.fromRoutingInbean(routingInBean);
-        switch (routingState) {
-            case RoutingState.RoutingStateEntryPointDiscovery routingStateEntryPointDiscovery -> {
-                handleEntryPointDiscovery(routingStateEntryPointDiscovery);
-            }
-            case RoutingState.RoutingStateEntryPointIssue routingStateEntryPointIssue -> {
-                handleEntryPointIssue(routingStateEntryPointIssue);
-            }
-            case RoutingState.RoutingStateEntryPointProcess routingStateEntryPointProcess -> {
-                handleEntryPointProcess(routingStateEntryPointProcess);
-            }
-            case RoutingState.RoutingStateInStepProcess routingStateInStepProcess -> {
-                handleInStepProcess(routingStateInStepProcess);
-            }
-            case RoutingState.RoutingStateInStepIssue routingStateInStepIssue -> {
-                handleInStepIssue(routingStateInStepIssue);
-            }
-            case RoutingState.RoutingStateInvalid routingStateInvalid -> {
-                handleInvalidState(routingStateInvalid);
-            }
-            // TODO :: 13/07/2025 :: Implement the routing logic by it self with the routing state managed
+        try {
+            RoutingState routingState = RoutingState.fromRoutingInbean(routingInBean);
+            var routingResult = switch (routingState) {
+                case RoutingState.RoutingStateEntryPointDiscovery routingStateEntryPointDiscovery -> handleEntryPointDiscovery(routingStateEntryPointDiscovery);
+                case RoutingState.RoutingStateEntryPointIssue routingStateEntryPointIssue -> handleEntryPointIssue(routingStateEntryPointIssue);
+                case RoutingState.RoutingStateEntryPointProcess routingStateEntryPointProcess -> handleEntryPointProcess(null, routingStateEntryPointProcess);
+                case RoutingState.RoutingStateInStepProcess routingStateInStepProcess -> handleInStepProcess(routingStateInStepProcess);
+                case RoutingState.RoutingStateInStepIssue routingStateInStepIssue -> handleInStepIssue(routingStateInStepIssue);
+                case RoutingState.RoutingStateInvalid routingStateInvalid -> handleInvalidState(routingStateInvalid);
+            };
+        } catch (Throwable t) {
+            // TODO :: 21/07/2025 :: Implement the exception error
+          // In case any exception occurs the process should go to Issue process
         }
+
 //            UUID flowId = routingInBean.getFlowId()
 //                .orElseThrow(() -> new ServiceFatalException("RoutingServiceImpl - handleMessage - No flowId for message. routingInBean '" + routingInBean + "'"));
 //            UUID flowKeyId = routingInBean.getFlowKeyId();
@@ -114,56 +95,123 @@ public class RoutingServiceImpl implements RoutingService {
 //        }
     }
 
+    private record RoutingInternalFields(
+//        List<FlowStepInbean> nextStepInBeanList,
+//        Optional<ProcessStepDto> previousProcess,
+//        List<ProcessStep> processAlterations
+    ) {}
+
     // ? =================================================================================
     // ?                  Nominal Process
     // ? =================================================================================
-    private static void handleInStepProcess(RoutingState.RoutingStateInStepProcess routingStateInStepProcess) {
+    private static Either<FlowRoutingError, FlowMethodContext> handleInStepProcess(
+        RoutingState.RoutingStateInStepProcess routingStateInStepProcess
+    ) {
         log.info("[NOMINAL][IN_STEP] Handling InStepProcess for '{}'", routingStateInStepProcess);
+
+        return Either.left(new FlowRoutingError.UnknownFlowStepRouting(new ServiceFatalException("Not Implemented Yet")));
     }
 
-    private static void handleEntryPointProcess(RoutingState.RoutingStateEntryPointProcess routingStateEntryPointProcess) {
+    private static Either<FlowRoutingError, FlowMethodContext> handleEntryPointProcess(
+//        FlowConfigurationService flowConfigurationService,
+        ProcessStepRepository processStepRepository,
+        RoutingState.RoutingStateEntryPointProcess routingStateEntryPointProcess
+    ) {
         log.info("[NOMINAL][ENTRYPOINT] Handling Entrypoint for '{}'", routingStateEntryPointProcess);
+        // Build Messages (No Issue Throwable possible)
+        // Save the process as completed (for previous step)
+
+//        var res = flowConfigurationService.getInitialStepInFlow(routingStateEntryPointProcess.flowKeyId())
+//            .map(stepId -> buildFlowStepInBeanFromEntryPointProcess(routingStateEntryPointProcess, stepId))
+//            .flatMap(routingInternalFields -> findOriginStepFromFlowStepInBean(
+//                processStepRepository, routingInternalFields
+//            ))
+//            .flatMap(routingInternalFields -> registerSuccessPreviousStep(
+//                processStepRepository, routingInternalFields
+//            ))
+//            .flatMap(inBean -> flowConfigurationService.getMessageChannelForStepId(inBean._1().getStepKeyId()))
+//            // Save the process as PENDING (Next Step)
+//            // .flatMap()
+//            // Send Message to MessageChannel
+//            ;
+
+        return Either.left(new FlowRoutingError.UnknownFlowStepRouting(new ServiceFatalException("Not Implemented Yet")));
     }
+
 
     // ? =================================================================================
     // ?                  Issue Process
     // ? =================================================================================
-    private static void handleEntryPointIssue(RoutingState.RoutingStateEntryPointIssue routingStateEntryPointIssue) {
+    private static Either<FlowRoutingError, FlowMethodContext> handleEntryPointIssue(RoutingState.RoutingStateEntryPointIssue routingStateEntryPointIssue) {
         log.info("[Issue][ENTRYPOINT] Handling Entrypoint for '{}'", routingStateEntryPointIssue);
+        return Either.left(new FlowRoutingError.UnknownFlowStepRouting(new ServiceFatalException("Not Implemented Yet")));
     }
 
-    private static void handleInStepIssue(RoutingState.RoutingStateInStepIssue routingStateInStepIssue) {
+    private static Either<FlowRoutingError, FlowMethodContext> handleInStepIssue(RoutingState.RoutingStateInStepIssue routingStateInStepIssue) {
         log.info("[Issue][IN_STEP] Handling InStepProcess for '{}'", routingStateInStepIssue);
+        return Either.left(new FlowRoutingError.UnknownFlowStepRouting(new ServiceFatalException("Not Implemented Yet")));
     }
 
-    private static void handleInvalidState(RoutingState.RoutingStateInvalid routingStateInvalid) {
+    private static Either<FlowRoutingError, FlowMethodContext> handleInvalidState(RoutingState.RoutingStateInvalid routingStateInvalid) {
         log.info("[ISSUE][INVALID] Handling InStepProcess for '{}'", routingStateInvalid);
+        return Either.left(new FlowRoutingError.UnknownFlowStepRouting(new ServiceFatalException("Not Implemented Yet")));
     }
 
     // ? =================================================================================
     // ?                  Discovery Process
     // ? =================================================================================
-    private static void handleEntryPointDiscovery(RoutingState.RoutingStateEntryPointDiscovery routingStateEntryPointDiscovery) {
+    private static Either<FlowRoutingError, FlowMethodContext> handleEntryPointDiscovery(RoutingState.RoutingStateEntryPointDiscovery routingStateEntryPointDiscovery) {
         log.info("[DISCOVERY][ENTRYPOINT] Handling Entrypoint for '{}'", routingStateEntryPointDiscovery);
+        return Either.left(new FlowRoutingError.UnknownFlowStepRouting(new ServiceFatalException("Not Implemented Yet")));
     }
 
-
-
-
-    private static void terminateProcessAsCompleteSuccess(ProcessStep previousProcessStep, ProcessStepRepository processStepRepository) {
-        previousProcessStep.setStepStatus(StepStatus.COMPLETED);
-        previousProcessStep.setUpdatedAt(ZonedDateTime.now());
-        previousProcessStep.setEndTime(ZonedDateTime.now());
-        processStepRepository.saveAndFlush(previousProcessStep);
-    }
-
-    private static FlowStepInbean buildNextMessageAndSaveProcess(
-        UUID nextStepId,
-        UUID flowId,
-        UUID flowKeyId,
-        String flowDataId,
-        ProcessStepRepository processStepRepository
+    private static Either<FlowRoutingError, RoutingInternalFields> findOriginStepFromFlowStepInBean(
+        ProcessStepService processStepService,
+        ProcessStepRepository processStepRepository,
+        RoutingInternalFields internalFields
     ) {
+        return null;
+    }
+
+    private static Either<FlowRoutingError, FlowMethodContext> sendMessageToMessageChannel() {
+        return Either.left(new FlowRoutingError.UnknownFlowStepRouting(new ServiceFatalException("Not Implemented Yet")));
+    }
+
+
+
+    private static RoutingInternalFields buildFlowStepInBeanFromEntryPointProcess(
+        RoutingState.RoutingStateEntryPointProcess routingStateEntryPointProcess,
+        UUID stepKeyId
+    ) {
+        var nextFlowStepInBean = FlowStepInbean.builder()
+            .flowId(routingStateEntryPointProcess.flowId())
+            .flowKeyId(routingStateEntryPointProcess.flowKeyId())
+            .flowDataId(routingStateEntryPointProcess.flowDataId())
+            .stepKeyId(stepKeyId)
+            .stepId(UUID.randomUUID())
+            .build();
+        return new RoutingInternalFields(
+//            List.of(nextFlowStepInBean),
+//            Optional.empty(),
+//            List.empty()
+        );
+
+    }
+
+//    private static void terminateProcessAsCompleteSuccess(ProcessStep previousProcessStep, ProcessStepRepository processStepRepository) {
+//        previousProcessStep.setStepStatus(StepStatus.COMPLETED);
+//        previousProcessStep.setUpdatedAt(ZonedDateTime.now());
+//        previousProcessStep.setEndTime(ZonedDateTime.now());
+//        processStepRepository.saveAndFlush(previousProcessStep);
+//    }
+
+//    private static FlowStepInbean buildNextMessageAndSaveProcess(
+//        UUID nextStepId,
+//        UUID flowId,
+//        UUID flowKeyId,
+//        String flowDataId,
+//        ProcessStepRepository processStepRepository
+//    ) {
 //        ProcessStep nextProcessStep = ProcessStep.builder()
 //            .stepId(nextStepId)
 //            .flowId(flowId)
@@ -180,18 +228,18 @@ public class RoutingServiceImpl implements RoutingService {
 //            .flowDataId(flowDataId)
 //            .stepKeyId(nextProcessStep.getId())
 //            .build();
-        return null;
-    }
+//        return null;
+//    }
 
-    private static void sendIssueMessage(
-        FlowExceptionsRepository flowExceptionsRepository,
-        Exception sendingMessageException,
-        UUID flowId,
-        UUID flowKeyId,
-        UUID originStepId,
-        MessageChannel issueChannel,
-        Boolean flowEndingException
-    ) {
+//    private static void sendIssueMessage(
+//        FlowExceptionsRepository flowExceptionsRepository,
+//        Exception sendingMessageException,
+//        UUID flowId,
+//        UUID flowKeyId,
+//        UUID originStepId,
+//        MessageChannel issueChannel,
+//        Boolean flowEndingException
+//    ) {
 //        UUID exceptionId = ExceptionUtils.storeExceptionInFlowToTheDatabase(flowExceptionsRepository, sendingMessageException);
 //        IssueHandlerInbean issueHandlerInbean = IssueHandlerInbean.builder()
 //            .flowId(Optional.of(flowId))
@@ -204,16 +252,16 @@ public class RoutingServiceImpl implements RoutingService {
 //        // TODO :: no Check on the sending for issue queue, otherwise The service is on fatal state
 //        log.info("Sending Message to issue channel '{}'", issueHandlerInbean);
 //        issueChannel.send(issueMessage);
-    }
+//    }
 
-    private static void sendIssueMessage(
-        UUID exceptionId,
-        UUID flowId,
-        UUID flowKeyId,
-        UUID originStepId,
-        MessageChannel issueChannel,
-        Boolean flowEndingException
-    ) {
+//    private static void sendIssueMessage(
+//        UUID exceptionId,
+//        UUID flowId,
+//        UUID flowKeyId,
+//        UUID originStepId,
+//        MessageChannel issueChannel,
+//        Boolean flowEndingException
+//    ) {
 //        IssueHandlerInbean issueHandlerInbean = IssueHandlerInbean.builder()
 //            .flowId(Optional.of(flowId))
 //            .flowKeyId(flowKeyId)
@@ -224,5 +272,5 @@ public class RoutingServiceImpl implements RoutingService {
 //        Message<IssueHandlerInbean> issueMessage = MessageBuilder.withPayload(issueHandlerInbean).build();
 //        // TODO :: no Check on the sending for issue queue, otherwise The service is on fatal state
 //        issueChannel.send(issueMessage);
-    }
+//    }
 }

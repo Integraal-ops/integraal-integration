@@ -1,8 +1,8 @@
 package com.integraal.ops.integration.flow;
 
 import com.integraal.ops.integration.flow.beans.IssueHandlerInbean;
-import com.integraal.ops.integration.model.persistence.FlowException;
-import com.integraal.ops.integration.model.repositories.FlowExceptionsRepository;
+import com.integraal.ops.integration.model.persistence.jooq.generated.tables.pojos.FlowException;
+import com.integraal.ops.integration.model.repositories.FlowExceptionRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,18 +13,18 @@ import java.util.UUID;
 @Service
 @Slf4j
 public class IssueHandlerServiceImpl implements IssueHandlerService {
-    private final FlowExceptionsRepository flowExceptionsRepository;
+    private final FlowExceptionRepository flowExceptionRepository;
 
     @Autowired
-    public IssueHandlerServiceImpl(FlowExceptionsRepository flowExceptionsRepository) {
-        this.flowExceptionsRepository = flowExceptionsRepository;
+    public IssueHandlerServiceImpl(FlowExceptionRepository flowExceptionRepository) {
+        this.flowExceptionRepository = flowExceptionRepository;
     }
 
     @Override
     public void handleMessage(IssueHandlerInbean issueHandlerInbean) {
         log.info("Issue Handling flow steps in bean: '{}'", issueHandlerInbean);
         UUID exceptionId = issueHandlerInbean.getExceptionIdOnOriginStep();
-        Optional<FlowException> exception = flowExceptionsRepository.findById(exceptionId);
+        Optional<FlowException> exception = flowExceptionRepository.findById(exceptionId);
         if (exception.isPresent()) {
             FlowException flowException = exception.get();
             log.error("Issue on handling flow step '{}': message : '{}' - '{}'", issueHandlerInbean.getFlowId(), flowException.getMessage(), flowException.getStackTrace());

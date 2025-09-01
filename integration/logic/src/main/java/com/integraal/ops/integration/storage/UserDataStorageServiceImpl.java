@@ -19,6 +19,7 @@ import java.util.UUID;
 public class UserDataStorageServiceImpl implements UserDataStorageService {
     // ! TODO :: 22/06/2025 :: for now using hashMap in memory, later change for a better way
     private Map<UUID, UserDataStoreInBean> dataStore = new HashMap<>();
+
     @Override
     public Either<StorageWriteError, UserDataStoreOutBean> storeUnsanitizedUserData(UserDataStoreInBean userDataToStore) {
         UUID dataStoreId = UUID.randomUUID();

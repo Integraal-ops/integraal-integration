@@ -20,9 +20,9 @@
         <maven.surefire.plugin.version>3.5.3</maven.surefire.plugin.version>
         <maven.resources.plugin.version>3.3.1</maven.resources.plugin.version>
 
-        <spring.boot.version>3.4.5</spring.boot.version>
-        <spring-cloud.version>2024.0.1</spring-cloud.version>
-        <spring.integration.version>6.4.4</spring.integration.version>
+        <spring.boot.version>3.5.5</spring.boot.version>
+        <spring-cloud.version>2025.0.0</spring-cloud.version>
+        <spring.integration.version>6.5.1</spring.integration.version>
         <!--    Spring Integration AWS missing from spring integration bom -->
         <spring.integration.aws.version>3.0.9</spring.integration.aws.version>
         <awscloud.spring.version>3.3.0</awscloud.spring.version>
@@ -32,14 +32,14 @@
         <bouncycastle.bcpkix.jdk18on.version>1.80</bouncycastle.bcpkix.jdk18on.version>
         <bouncycastle.bcpg.jdk18on.version>1.80</bouncycastle.bcpg.jdk18on.version>
         <lombok.version>1.18.38</lombok.version>
-        <apache.commons.lang.version>3.17.0</apache.commons.lang.version>
+        <apache.commons.lang.version>3.18.0</apache.commons.lang.version>
         <apache.commons.collections4.version>4.5.0</apache.commons.collections4.version>
         <jsch.version>0.2.26</jsch.version>
 
         <junit.pioneer.version>2.3.0</junit.pioneer.version>
         <rest.assured.version>5.5.1</rest.assured.version>
         <wiremock.version>3.13.0</wiremock.version>
-        <org.testcontainers.version>1.21.0</org.testcontainers.version>
+        <org.testcontainers.version>1.21.3</org.testcontainers.version>
         <testcontainers.postgresql.version>1.21.0</testcontainers.postgresql.version>
     </properties>
 

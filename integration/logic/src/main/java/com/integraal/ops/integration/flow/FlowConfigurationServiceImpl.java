@@ -2,7 +2,9 @@ package com.integraal.ops.integration.flow;
 
 import com.integraal.ops.integration.flow.beans.FlowDefinition;
 import com.integraal.ops.integration.flow.beans.StepDefinition;
+import com.integraal.ops.integration.flow.errors.FlowRoutingError;
 import com.integraal.ops.integration.transversal.exceptions.ServiceFatalException;
+import io.vavr.control.Either;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.GenericApplicationContext;
@@ -37,7 +39,12 @@ public class FlowConfigurationServiceImpl implements FlowConfigurationService {
         this.integrationFlowContext = integrationFlowContext;
         flowsToMessageChannels = new HashMap<>();
 
+        try {
         initializeFlowAdjacentMatrix(applicationContext, integrationFlowContext, FRANCE_TRAVAIL_FLOW, flowsToMessageChannels);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         this.applicationContext = applicationContext;
     }
 
@@ -126,6 +133,20 @@ public class FlowConfigurationServiceImpl implements FlowConfigurationService {
         );
     }
 
+    @Override
+    public Either<FlowRoutingError, List<UUID>> getNextStepsInFlow(UUID flowKeyId, UUID stepKeyId) {
+        return null;
+    }
+
+    @Override
+    public Either<FlowRoutingError, UUID> getInitialStepInFlow(UUID flowKeyId) {
+        return null;
+    }
+
+    @Override
+    public Either<FlowRoutingError, MessageChannel> getMessageChannelForStepId(UUID stepKeyId) {
+        return null;
+    }
 
 
     // ? ======================== Internals ======================================

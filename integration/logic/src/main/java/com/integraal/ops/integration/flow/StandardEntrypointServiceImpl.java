@@ -4,9 +4,9 @@ import com.integraal.ops.integration.flow.beans.EntrypointFlowInbean;
 import com.integraal.ops.integration.flow.beans.RoutingInBean;
 import com.integraal.ops.integration.flow.beans.RoutingType;
 import com.integraal.ops.integration.flow.errors.EntrypointError;
-import com.integraal.ops.integration.storage.ExceptionStorageService;
+import com.integraal.ops.integration.data.FlowExceptionService;
 import com.integraal.ops.integration.storage.UserDataStorageService;
-import com.integraal.ops.integration.storage.beans.ExceptionStoreInBean;
+import com.integraal.ops.integration.data.beans.FlowExceptionStoreInBean;
 import com.integraal.ops.integration.storage.beans.UserDataStorageType;
 import com.integraal.ops.integration.storage.beans.UserDataStoreInBean;
 import com.integraal.ops.integration.storage.beans.UserDataType;
@@ -27,17 +27,17 @@ import java.util.UUID;
 public class StandardEntrypointServiceImpl implements EntrypointService {
     private final MessageChannel routingChannel;
     private final UserDataStorageService userDataStorageService;
-    private final ExceptionStorageService exceptionStorageService;
+    private final FlowExceptionService flowExceptionService;
 
     @Autowired
     public StandardEntrypointServiceImpl(
             MessageChannel routingChannel,
             UserDataStorageService userDataStorageService,
-            ExceptionStorageService exceptionStorageService
+            FlowExceptionService flowExceptionService
     ) {
         this.routingChannel = routingChannel;
         this.userDataStorageService = userDataStorageService;
-        this.exceptionStorageService = exceptionStorageService;
+        this.flowExceptionService = flowExceptionService;
     }
 
     @Override
@@ -45,14 +45,14 @@ public class StandardEntrypointServiceImpl implements EntrypointService {
         log.info("Entrypoint for flow '{}' started", entrypointFlowInbean);
         // ? Flow iteration ID
         UUID flowId = UUID.randomUUID();
-
+        // TODO :: 21/07/2025 :: save the process in the custom repository with Either handling
         FlowMethodContext initialContext = FlowMethodContext.initializeFlowMethodContext();
         FlowMethodContext resultContext = validateEntrypointFlowInbean(entrypointFlowInbean)
             .flatMap(StandardEntrypointServiceImpl::sanitizeData)
             .flatMap(
                 efib -> buildRoutingInbeanFromEntrypoint(userDataStorageService, efib, flowId))
             .fold(
-                error -> handleErrorEntrypointFlowInbean(exceptionStorageService, userDataStorageService, routingChannel, initialContext, entrypointFlowInbean, flowId),
+                error -> handleErrorEntrypointFlowInbean(flowExceptionService, userDataStorageService, routingChannel, initialContext, entrypointFlowInbean, flowId),
                 routingInBean -> handleSuccessEntrypointFlowInbean(routingChannel, initialContext, routingInBean)
             );
 
@@ -124,7 +124,7 @@ public class StandardEntrypointServiceImpl implements EntrypointService {
 
     private static FlowMethodContext handleErrorEntrypointFlowInbean(
             // * Autowired lifecycle component
-            ExceptionStorageService exceptionStorageService,
+            FlowExceptionService flowExceptionService,
             UserDataStorageService userDataStorageService,
             MessageChannel routingChannel,
             // * Data used Component
@@ -141,13 +141,13 @@ public class StandardEntrypointServiceImpl implements EntrypointService {
         RoutingInBean routingInBean = userDataStorageService.storeUnsanitizedUserData(userDataStoreInBean)
             .fold(
                 storageWriteError -> {
-                    ExceptionStoreInBean exceptionStoreInBean = ExceptionStoreInBean.builder()
+                    FlowExceptionStoreInBean flowExceptionStoreInBean = FlowExceptionStoreInBean.builder()
                         .exceptionToStore(storageWriteError.toException())
                         .build();
-                    var errorStored = exceptionStorageService.storeExceptionData(exceptionStoreInBean)
+                    Optional<UUID> errorStored = flowExceptionService.storeExceptionData(flowExceptionStoreInBean)
                         .fold(
                             // ! TODO :: 22/06/2025 :: Do not ignore this error in the future
-                            _ignored -> Optional.<UUID>empty(),
+                            _ignored -> Optional.empty(),
                             exceptionStoreOutBean -> Optional.of(exceptionStoreOutBean.getExceptionId())
                         );
                     return RoutingInBean.builder()
