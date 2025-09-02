@@ -1,3 +1,9 @@
+## NIX devenv
+.devenv*
+.direnv
+.pre-commit-config.yaml
+
+
 **/**.iml
 .idea/**
 
